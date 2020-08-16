@@ -1,0 +1,9 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+<file>resource/history.png</file>
+<file>resource/setting.png</file>
+<file>resource/dumbbell.png</file>
+<file>resource/line.png</file>
+</qresource>
+</RCC>
