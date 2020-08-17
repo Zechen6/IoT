@@ -115,7 +115,7 @@ def recvDataClient():
             continue
         else:
             length = int(recvData[0:len(recvData) - 1])
-            print('要传入的数据大小为：' + str(length))
+            # print('要传入的数据大小为：' + str(length))
 
         # 接收数据
         recvData = b''
@@ -124,10 +124,14 @@ def recvDataClient():
             length -= len(data)
             recvData += data
         clientSocket.sendall(b'OK\n')
-        print("传入的数据" + str(recvData))
+        # print("传入的数据" + str(recvData))
 
         # 处理数据
         messages.put(recvData)
+
+
+def getMessages():
+    return messages
 
 
 if __name__ == '__main__':
@@ -135,24 +139,6 @@ if __name__ == '__main__':
     recvDataThread.start()
     sendDataThread = threading.Thread(target=sendDataClient)
     sendDataThread.start()
-    # isStop = True
-    # # 连接设备端——相对于设备端，这是服务器
-    # serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # serverSocket.bind(("127.0.0.1", 8082))
-    # serverSocket.listen(5)
-    # print("等待连接")
-    # client_socket, client_info = serverSocket.accept()
-    # # 连接服务器——相对于云端，这是客户端
-    # server_address = ('127.0.0.1', 8081)  # 服务器地址
-    # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 初始化socket
-    # s.connect(server_address)  # 建立连接
-    # # 发送数据
-    # i = 0
-    # while isStop:
-    #     i += 1
-    #     sendDataToSever(get(), get_sensor_value(client_socket), s, i)
-    #     if i == 65535:  # 对齐数据，防止网络传输过程中顺序错乱
-    #         i = 0
 
 
 

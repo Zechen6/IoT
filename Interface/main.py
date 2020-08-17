@@ -53,7 +53,9 @@ class MainWidget(QWidget):
         thread2.start()
 
         # 开启摄像头
-        raspberry_camara.openCamera()
+        # raspberry_camara.openCamera()
+
+        self.listenEvent()
 
     def enter_select(self):
         print("进入动作选择界面")
@@ -72,6 +74,17 @@ class MainWidget(QWidget):
     # 使用该方法设置锻炼界面中的一些数值和提示信息
     def updateDataOnExercise(self, i, text):
         self.exercise_widget.ui.changeData(i, str(text))
+
+    def listenEvent(self):
+        self.thread = Runthread()
+        self.thread.signal.connect(self.eventChoose)
+        self.thread.start()
+
+    def eventChoose(self, msg):
+        # TODO 根据msg更新界面上的信息
+        print(msg)
+        self.enter_exercise(self.select_widget.ui.listWidget.item(0))
+
 
 '''
     def listenEvent(self):
@@ -118,6 +131,24 @@ class Runthread(QtCore.QThread):
             self._signal.emit(str(info))  # 信号发送
             info = ''
 '''
+
+
+class Runthread(QtCore.QThread):
+    signal = pyqtSignal(str)
+
+    def __init__(self):
+        super(Runthread, self).__init__()
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        while True:
+            # TODO 此处还需要添加防止误判的功能
+            message = raspberry_camara.getMessages().get()
+            # TODO 处理message数据（此处可以调用评分系统来处理）
+            self.signal.emit(str(message, encoding="UTF-8"))  # 信号发送
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

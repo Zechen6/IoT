@@ -37,7 +37,7 @@ def recvDataServer():
                 continue
             else:
                 length = int(recvData[0:len(recvData) - 1])
-                print('要传入的数据大小为：' + str(length))
+                # print('要传入的数据大小为：' + str(length))
 
             recvData = b''
             # 接收数据
@@ -46,7 +46,7 @@ def recvDataServer():
                 length -= len(data)
                 recvData += data
             tcpSocket.sendall(b'OK\n')
-            print("传入的数据" + str(recvData))
+            # print("传入的数据" + str(recvData))
 
             # TODO 处理数据
             sensorDataQueue.put(recvData)
@@ -75,7 +75,7 @@ def sendDataServer():
 
         while True:
             sendData = handleDataQueue.get()
-            print(sendData)
+            # print(sendData)
             length = len(sendData)
 
             # 发送数据长度
@@ -103,7 +103,7 @@ def handleDataProc():
     while True:
         # TODO 处理数据
         rawData = sensorDataQueue.get()
-        handleData = (str(rawData) + str(time.time())).encode("UTF-8")
+        handleData = (str(rawData, encoding="UTF-8") + str(time.time())).encode("UTF-8")
         handleDataQueue.put(handleData)
 
 
