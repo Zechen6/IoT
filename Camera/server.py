@@ -101,6 +101,7 @@ def sendDataServer():
 
 def handleDataProc():
     while True:
+        # TODO 处理数据
         rawData = sensorDataQueue.get()
         handleData = (str(rawData) + str(time.time())).encode("UTF-8")
         handleDataQueue.put(handleData)

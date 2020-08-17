@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import *
 import socket
 import re
 import ui
+import threading
+import raspberry_camara
 
 
 class MainWidget(QWidget):
@@ -17,7 +19,7 @@ class MainWidget(QWidget):
     HINT = 5
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
 
         # 初始化
         palette = QPalette()
@@ -43,7 +45,15 @@ class MainWidget(QWidget):
         self.stack.addWidget(self.exercise_widget)
         self.setLayout(self.stack)
         self.resize(500, 800)
-        self.listenEvent()
+
+        # 建立与服务器之间的链接
+        thread1 = threading.Thread(target=raspberry_camara.sendDataClient)
+        thread1.start()
+        thread2 = threading.Thread(target=raspberry_camara.recvDataClient)
+        thread2.start()
+
+        # 开启摄像头
+        raspberry_camara.openCamera()
 
     def enter_select(self):
         print("进入动作选择界面")
@@ -63,14 +73,14 @@ class MainWidget(QWidget):
     def updateDataOnExercise(self, i, text):
         self.exercise_widget.ui.changeData(i, str(text))
 
-
+'''
     def listenEvent(self):
         self.thread = Runthread()
         self.thread._signal.connect(self.eventChoose)
         self.thread.start()
 
 
-    def eventChoose(self,msg):
+    def eventChoose(self, msg):
         if re.search("InfoControll", str(msg)) != None:
             m = str(msg)
             self.updateDataOnExercise(int(m.split('_')[1]), m)
@@ -107,6 +117,7 @@ class Runthread(QtCore.QThread):
             info = client.recv(1024)
             self._signal.emit(str(info))  # 信号发送
             info = ''
+'''
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
