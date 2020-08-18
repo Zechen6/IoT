@@ -11,19 +11,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import re
 
 
-suggestions = [
-    [
-        "不要在最低点放松手臂,保持发力，加油",
-        "保持胳膊肘的稳定，不要跟随哑铃上抬",
-        "肘部不要向外延伸，请保持和身体平面垂直"
-    ],
-    [
-        "不要耸肩！！！",
-        "请保持两边肩膀高度一致！！！！",
-        "重量过大，请立刻停止！！！！！"
-    ]
-]
-
 class Ui_Form(object):
     ANGLE = 1
     MUSCLE_STRENGTH = 2

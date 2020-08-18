@@ -129,6 +129,43 @@ def recvDataClient():
         # 处理数据
         messages.put(recvData)
 
+def recvDataClient2():
+    # 准备socket
+    serverAddress = ('127.0.0.1', 8083)
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    print("等待连接....")
+    clientSocket.connect(serverAddress)  # 建立连接
+
+    while True:
+        # 接收命令
+        recvData = b''
+        while True:
+            data = clientSocket.recv(1024)
+            recvData += data
+            if recvData.endswith(b'\n'):
+                break
+        clientSocket.sendall(b'OK\n')
+        if recvData == b'Hello\n':
+            print('server:Hello')
+            continue
+        else:
+            length = int(recvData[0:len(recvData) - 1])
+            # print('要传入的数据大小为：' + str(length))
+
+        # 接收数据
+        recvData = b''
+        while length > 0:
+            data = clientSocket.recv(1024)
+            length -= len(data)
+            recvData += data
+        clientSocket.sendall(b'OK\n')
+        # print("传入的数据" + str(recvData))
+
+        # 处理数据
+        messages.put(recvData)
+
+
 
 def getMessages():
     return messages

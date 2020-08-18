@@ -10,6 +10,19 @@ import ui
 import threading
 import raspberry_camara
 
+suggestions = [
+    [
+        "不要在最低点放松手臂,保持发力，加油",
+        "保持胳膊肘的稳定，不要跟随哑铃上抬",
+        "肘部不要向外延伸，请保持和身体平面垂直"
+    ],
+    [
+        "不要耸肩！！！",
+        "请保持两边肩膀高度一致！！！！",
+        "重量过大，请立刻停止！！！！！"
+    ]
+]
+
 
 class MainWidget(QWidget):
 
@@ -58,9 +71,11 @@ class MainWidget(QWidget):
         # thread1.start()
         # thread2 = threading.Thread(target=raspberry_camara.recvDataClient)
         # thread2.start()
+        thread3 = threading.Thread(target=raspberry_camara.recvDataClient2)
+        thread3.start()
 
         # 开启摄像头
-        # raspberry_camara.openCamera()
+        raspberry_camara.openCamera()
 
         self.listenEvent()
 
@@ -80,14 +95,23 @@ class MainWidget(QWidget):
 
     def enter_exercise(self, item):
         print("进入锻炼界面")
-        self.index = 1
         self.exercise_widget.ui.movementName.setText(item.text())
         self.stack.setCurrentIndex(2)
         # TODO 在锻炼界面需要与服务器交互
 
     # 使用该方法设置锻炼界面中的一些数值和提示信息
     def updateDataOnExercise(self, i, text):
-        self.exercise_widget.ui.changeData(i, str(text))
+        # self.exercise_widget.ui.changeData(i, str(text))
+        if i == self.HINT:
+            self.exercise_widget.ui.hint.setText(text)
+        elif i == self.ANGLE:
+            self.exercise_widget.ui.angle.setText(text + "/100")
+        elif i == self.MUSCLE_STRENGTH:
+            self.exercise_widget.ui.muscleStrength.setText(text + "/100")
+        elif i == self.PHYSIOLOGICAL_FUNCTION:
+            self.exercise_widget.ui.physiologicalFunction.setText(text + "/100")
+        elif i == self.NUMBER:
+            self.exercise_widget.ui.number.setText(text)
 
     def listenEvent(self):
         self.thread = Runthread()
@@ -118,8 +142,7 @@ class MainWidget(QWidget):
             self.select_widget.ui.listWidget.item(self.index - 1).setForeground(QColor(255, 255, 0))
             self.select_widget.ui.listWidget.scrollToItem(self.select_widget.ui.listWidget.item(self.index - 1))
 
-
-    def eventChoose(self, msg):
+    def eventChoose(self, msg: str):
         # TODO 根据msg更新界面上的信息
         curIndex = self.stack.currentIndex()
         if msg == "back":
@@ -138,10 +161,24 @@ class MainWidget(QWidget):
         elif msg == "down":
             self.down()
         else:
-            if curIndex == 2:
-                # TODO 根据msg修改数据
-                pass
+            if curIndex != 2:
+                return
+            if msg[0] == ":":
+                i = int(msg[1:])
+                if i >= len(suggestions[self.index]):
+                    return
+                self.updateDataOnExercise(i=self.HINT, text=suggestions[self.index][i])
+            else:
+                l = msg.split(' ')
+                for i in range(4):
+                    self.updateDataOnExercise(i=i+1, text=l[i])
 
+'''
+ANGLE = 1
+MUSCLE_STRENGTH = 2
+PHYSIOLOGICAL_FUNCTION = 3
+NUMBER = 4
+'''
 
 '''
     def listenEvent(self):
@@ -200,19 +237,12 @@ class Runthread(QtCore.QThread):
 
     def run(self):
         while True:
-            # TODO 此处还需要添加防止误判的功能
+            # 此处还需要添加防止误判的功能
             message = raspberry_camara.getMessages().get()
-            # TODO 处理message数据（此处可以调用评分系统来处理）
-            print("发送消息")
+            # 处理message数据（此处可以调用评分系统来处理）
+            # print("发送消息")
             self.signal.emit(str(message, encoding="UTF-8"))  # 信号发送
 
-def test():
-    while True:
-        msg = input("请输入：")
-        raspberry_camara.getMessages().put(msg.encode("UTF-8"))
-
-thread = threading.Thread(target=test)
-thread.start()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

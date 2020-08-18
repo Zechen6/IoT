@@ -50,7 +50,6 @@ def recvDataServer():
                 tcpSocket.sendall(b'OK\n')
                 # print("传入的数据" + str(recvData))
 
-                # TODO 处理数据
                 sensorDataQueue.put(recvData)
         except ConnectionResetError:
             print("连接断开")
@@ -125,8 +124,7 @@ def main():
 
 
 if __name__ == "__main__":
-    recvDataThread = threading.Thread(target=recvDataServer)
-    recvDataThread.start()
+    main()
 
 
 
