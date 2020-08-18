@@ -14,6 +14,8 @@ class Start(QWidget):
         self.ui.setupUi(self)
         self.ui.retranslateUi(self)
 
+        self.widget = [self.ui.button_exercise, self.ui.button_history, self.ui.button_setting]
+
 
 class Exercise(QWidget):
 

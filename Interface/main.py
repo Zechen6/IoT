@@ -3,8 +3,9 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import socket
-import re
+
+
+import time
 import ui
 import threading
 import raspberry_camara
@@ -18,8 +19,14 @@ class MainWidget(QWidget):
     NUMBER = 4
     HINT = 5
 
+    NORMAL_BUTTON = "border:none;background-color:transparent"
+    FOCUS_BUTTON = NORMAL_BUTTON + ";" + "color:yellow"
+
     def __init__(self, parent=None):
         super().__init__()
+
+        # 当前所在控件
+        self.index = 0
 
         # 初始化
         palette = QPalette()
@@ -28,7 +35,7 @@ class MainWidget(QWidget):
 
         # 开始界面
         self.start_widget = ui.Start()
-        self.start_widget.ui.pushButton.clicked.connect(self.enter_select)
+        self.start_widget.ui.button_exercise.clicked.connect(self.enter_select)
 
         # 锻炼选择界面
         self.select_widget = ui.Select()
@@ -47,29 +54,36 @@ class MainWidget(QWidget):
         self.resize(500, 800)
 
         # 建立与服务器之间的链接
-        thread1 = threading.Thread(target=raspberry_camara.sendDataClient)
-        thread1.start()
-        thread2 = threading.Thread(target=raspberry_camara.recvDataClient)
-        thread2.start()
+        # thread1 = threading.Thread(target=raspberry_camara.sendDataClient)
+        # thread1.start()
+        # thread2 = threading.Thread(target=raspberry_camara.recvDataClient)
+        # thread2.start()
 
         # 开启摄像头
         # raspberry_camara.openCamera()
 
         self.listenEvent()
 
-    def enter_select(self):
-        print("进入动作选择界面")
-        self.stack.setCurrentIndex(1)
-
-    def enter_exercise(self, item):
-        print("进入锻炼界面")
-        self.exercise_widget.ui.movementName.setText(item.text())
-        self.stack.setCurrentIndex(2)
-        # TODO 在锻炼界面需要与服务器交互
+        self.enter_start()
 
     def enter_start(self):
         print("进入开始界面")
+        self.index = 1
         self.stack.setCurrentIndex(0)
+        self.start_widget.ui.button_exercise.setStyleSheet(self.FOCUS_BUTTON)
+
+    def enter_select(self):
+        print("进入动作选择界面")
+        self.index = 1
+        self.stack.setCurrentIndex(1)
+        self.select_widget.ui.listWidget.item(0).setForeground(QColor(255, 255, 0))
+
+    def enter_exercise(self, item):
+        print("进入锻炼界面")
+        self.index = 1
+        self.exercise_widget.ui.movementName.setText(item.text())
+        self.stack.setCurrentIndex(2)
+        # TODO 在锻炼界面需要与服务器交互
 
     # 使用该方法设置锻炼界面中的一些数值和提示信息
     def updateDataOnExercise(self, i, text):
@@ -80,10 +94,53 @@ class MainWidget(QWidget):
         self.thread.signal.connect(self.eventChoose)
         self.thread.start()
 
+    def down(self):
+        curIndex = self.stack.currentIndex()
+        if curIndex == 0 and self.index != 3:
+            self.start_widget.widget[self.index - 1].setStyleSheet(self.NORMAL_BUTTON)
+            self.index += 1
+            self.start_widget.widget[self.index - 1].setStyleSheet(self.FOCUS_BUTTON)
+        elif curIndex == 1 and self.index != self.select_widget.ui.listWidget.count():
+            self.select_widget.ui.listWidget.item(self.index - 1).setForeground(QColor(255, 255, 255))
+            self.index += 1
+            self.select_widget.ui.listWidget.item(self.index - 1).setForeground(QColor(255, 255, 0))
+            self.select_widget.ui.listWidget.scrollToItem(self.select_widget.ui.listWidget.item(self.index - 1))
+
+    def up(self):
+        curIndex = self.stack.currentIndex()
+        if curIndex == 0 and self.index != 1:
+            self.start_widget.widget[self.index - 1].setStyleSheet(self.NORMAL_BUTTON)
+            self.index -= 1
+            self.start_widget.widget[self.index - 1].setStyleSheet(self.FOCUS_BUTTON)
+        elif curIndex == 1 and self.index != 1:
+            self.select_widget.ui.listWidget.item(self.index - 1).setForeground(QColor(255, 255, 255))
+            self.index -= 1
+            self.select_widget.ui.listWidget.item(self.index - 1).setForeground(QColor(255, 255, 0))
+            self.select_widget.ui.listWidget.scrollToItem(self.select_widget.ui.listWidget.item(self.index - 1))
+
+
     def eventChoose(self, msg):
         # TODO 根据msg更新界面上的信息
-        print(msg)
-        self.enter_exercise(self.select_widget.ui.listWidget.item(0))
+        curIndex = self.stack.currentIndex()
+        if msg == "back":
+            if curIndex != 0:
+                self.stack.setCurrentIndex(curIndex - 1)
+            else:
+                print("退出")
+        elif msg == "enter":
+            print("进入")
+            if curIndex == 0 and self.index == 1:
+                self.enter_select()
+            elif curIndex == 1:
+                self.enter_exercise(self.select_widget.ui.listWidget.item(self.index))
+        elif msg == "up":
+            self.up()
+        elif msg == "down":
+            self.down()
+        else:
+            if curIndex == 2:
+                # TODO 根据msg修改数据
+                pass
 
 
 '''
@@ -132,7 +189,6 @@ class Runthread(QtCore.QThread):
             info = ''
 '''
 
-
 class Runthread(QtCore.QThread):
     signal = pyqtSignal(str)
 
@@ -147,8 +203,16 @@ class Runthread(QtCore.QThread):
             # TODO 此处还需要添加防止误判的功能
             message = raspberry_camara.getMessages().get()
             # TODO 处理message数据（此处可以调用评分系统来处理）
+            print("发送消息")
             self.signal.emit(str(message, encoding="UTF-8"))  # 信号发送
 
+def test():
+    while True:
+        msg = input("请输入：")
+        raspberry_camara.getMessages().put(msg.encode("UTF-8"))
+
+thread = threading.Thread(target=test)
+thread.start()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

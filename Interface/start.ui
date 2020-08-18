@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>524</width>
-    <height>621</height>
+    <width>532</width>
+    <height>626</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -100,6 +100,15 @@ color: white</string>
              </color>
             </brush>
            </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
           </active>
           <inactive>
            <colorrole role="WindowText">
@@ -156,6 +165,15 @@ color: white</string>
              </color>
             </brush>
            </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
           </inactive>
           <disabled>
            <colorrole role="WindowText">
@@ -209,6 +227,15 @@ color: white</string>
               <red>0</red>
               <green>0</green>
               <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
@@ -304,7 +331,7 @@ color: white</string>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="button_exercise">
           <property name="font">
            <font>
             <family>宋体</family>
@@ -361,7 +388,7 @@ color: white</string>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="button_history">
           <property name="font">
            <font>
             <pointsize>18</pointsize>
@@ -417,7 +444,7 @@ color: white</string>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="button_setting">
           <property name="font">
            <font>
             <pointsize>18</pointsize>
@@ -430,7 +457,7 @@ color: white</string>
            <string notr="true">border:none;background-color:transparent</string>
           </property>
           <property name="text">
-           <string>设置</string>
+           <string>设  置</string>
           </property>
          </widget>
         </item>

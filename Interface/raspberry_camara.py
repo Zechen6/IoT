@@ -135,8 +135,8 @@ def getMessages():
 
 
 if __name__ == '__main__':
-    recvDataThread = threading.Thread(target=recvDataClient)
-    recvDataThread.start()
+    # recvDataThread = threading.Thread(target=recvDataClient)
+    # recvDataThread.start()
     sendDataThread = threading.Thread(target=sendDataClient)
     sendDataThread.start()
 
