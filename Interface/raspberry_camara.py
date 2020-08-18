@@ -7,6 +7,9 @@ import queue
 sensorData = None
 messages = queue.Queue()
 
+serverAddressG = '192.168.0.109'
+sensorAddress = '192.168.0.111'
+
 
 # 打开摄像头
 def openCamera():
@@ -17,14 +20,14 @@ def openCamera():
 def getImg():
     import requests
     try:
-        img = requests.get('http://192.168.0.111:8080/?action=snapshot&n=1', timeout=1).content
+        img = requests.get('http://127.0.0.1:8080/?action=snapshot&n=1', timeout=1).content
         print(img)
         print('Get local img success')
         return img
     except:
         print('get snapshot fail')
 
-
+'''
 # 获取传感器数据
 def recvSensorData():
     # TODO 与传感器连接
@@ -42,17 +45,54 @@ def recvSensorData():
     if len(recv_data) < 0:
         recv_data = client_socket.recv(1024)
     return recv_data
+'''
 
+
+# 获取传感器数据
+def recvSensorData(client_socket):
+    # TODO 与传感器连接
+    client_socket.sendall("B".encode(encoding="UTF-8"))
+    recv_data = client_socket.recv(1024)
+    if len(recv_data) < 0:
+        recv_data = client_socket.recv(1024)
+    return recv_data
+
+
+# 初始化传感器server
+def initSensorServer():
+    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serverSocket.bind((sensorAddress, 8090))
+    serverSocket.listen(5)
+    print("等待连接")
+    client_socket, client_info = serverSocket.accept()
+    recv_data = client_socket.recv(1024)
+    print("init")
+    print(recv_data)
+    if recv_data == b'hello from ESP8266':
+        client_socket.sendall("start".encode(encoding="UTF-8"))
+        print("准备就绪")
+    return client_socket
 
 # 获取数据
-def getData():
+def getData(clientSocket):
     # TODO 刘泽晨
-    return b'datatata'
-
+    internal = "\x00\x00\x00\x00"
+    try:
+        img = getImg()
+        sensorData = recvSensorData(clientSocket)
+        print(len(sensorData))
+        fill = bytes(1024-(len(sensorData)))
+        sensorData = bytes(sensorData)+fill
+        print(sensorData)
+        print(len(sensorData))
+        data = bytes(img) + bytes(sensorData)
+    except:
+        return b''
+    return data
 
 def sendDataClient():
     # 准备socket
-    serverAddress = ('127.0.0.1', 8081)
+    serverAddress = (serverAddressG, 8081)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     print("等待连接....")
@@ -67,8 +107,9 @@ def sendDataClient():
         if data.endswith(b'\n'):
             break
 
+    sensorSocket = initSensorServer()
     while True:
-        sendData = getData()
+        sendData = getData(sensorSocket)
         length = len(sendData)
 
         # 发送数据长度
@@ -95,7 +136,7 @@ def sendDataClient():
 
 def recvDataClient():
     # 准备socket
-    serverAddress = ('127.0.0.1', 8082)
+    serverAddress = (serverAddressG, 8082)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     print("等待连接....")
