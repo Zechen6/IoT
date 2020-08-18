@@ -7,11 +7,11 @@ import threading
 # 存储接收到的传感器数据
 sensorDataQueue = queue.Queue()
 handleDataQueue = queue.Queue()
-
+address = "192.168.0.109"
 
 def recvDataServer():
     # 准备socket
-    serverAddress = ("127.0.0.1", 8081)
+    serverAddress = ("192.168.0.109", 8081)
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serverSocket.bind(serverAddress)
 
@@ -58,7 +58,7 @@ def recvDataServer():
 
 def sendDataServer():
     # 准备socket
-    serverAddress = ("127.0.0.1", 8082)
+    serverAddress = ("192.168.0.109", 8082)
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serverSocket.bind(serverAddress)
 
@@ -111,9 +111,58 @@ def handleDataProc():
     while True:
         # TODO 处理数据
         rawData = sensorDataQueue.get()
-        handleData = (str(rawData, encoding="UTF-8") + str(time.time())).encode("UTF-8")
+        handleData = getImgFromBytes(rawData)
+        sensorData = getSensorData(rawData)
+        # handleData = (str(rawData, encoding="UTF-8") + str(time.time())).encode("UTF-8")
         handleDataQueue.put(handleData)
 
+
+def getImgFromBytes(rawData):
+    length = len(rawData)
+    img = rawData[0:length-1024]
+    fileName = "x.jpg"
+    with open(fileName, 'wb') as file:
+        file.write(img)
+        file.close()
+    return img
+
+
+def getSensorData(rawData):
+    length = len(rawData)
+    sensorData = rawData[length-1024:length - 1]
+    sensorData = str(sensorData, "utf-8")
+    sensorData = operateSensorData(sensorData)
+    # print(sensorData)
+    return sensorData
+
+
+def operateSensorData(sensorData):
+    res = []
+    ax = 0
+    ay = 0
+    az = 0
+    gx = 0
+    gy = 0
+    gz = 0
+    muscle = 0
+    count = 0
+    X = sensorData.split('\n')
+    for i in X:
+        try:
+            count += 1
+            ax = ax + int(i.split('\t')[1])
+            ay = ay + int(i.split('\t')[2])
+            az = az + int(i.split('\t')[3])
+            gx = gx + int(i.split('\t')[4])
+            gy = gy + int(i.split('\t')[5])
+            gz = gz + int(i.split('\t')[6])
+            muscle = muscle + int(i.split('\t')[7])
+            sum_ = [ax, ay, az, gx, gy, gz, muscle]
+        except:
+
+            continue
+    # print([ax / count, ay / count, az / count, gx / count, gy / count, gz / count, muscle / count])
+    return [ax / count, ay / count, az / count, gx / count, gy / count, gz / count, muscle / count]
 
 def main():
     sendDataThread = threading.Thread(target=sendDataServer)
