@@ -127,6 +127,13 @@ class MainWidget(QWidget):
         else:
             self.timer_camera.start(30)
 
+        width = self.exercise_widget.ui.show.width()
+        height = self.exercise_widget.ui.show.height()
+
+        image = self.select_widget.pic[item.text()]
+        fimage = image.scaled(width, height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.exercise_widget.ui.show.setPixmap(fimage)
+
         # TODO 在锻炼界面需要与服务器交互
 
     # 使用该方法设置锻炼界面中的一些数值和提示信息

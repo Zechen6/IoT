@@ -37,10 +37,16 @@ class Select(QWidget):
         self.ui.setupUi(self)
         self.ui.retranslateUi(self)
 
+        self.pic = {}
+
         for i in self.movement:
             item = QListWidgetItem()
             item.setText(i)
             item.setSizeHint(QSize(100, 100))
             item.setTextAlignment(Qt.AlignCenter)
             self.ui.listWidget.addItem(item)
+
+            self.pic[i] = QPixmap(".\\resource\\" + i + ".png")
+
+
 
