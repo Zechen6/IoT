@@ -1,6 +1,6 @@
 import start
 import exercise
-import mySelect
+import select
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -33,7 +33,7 @@ class Select(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.ui = mySelect.Ui_Form()
+        self.ui = select.Ui_Form()
         self.ui.setupUi(self)
         self.ui.retranslateUi(self)
 

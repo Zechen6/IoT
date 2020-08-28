@@ -9,6 +9,8 @@ import time
 import ui
 import threading
 import raspberry_camara
+import cv2
+
 
 suggestions = [
     [
@@ -75,14 +77,33 @@ class MainWidget(QWidget):
         thread3.start()
 
         # 开启摄像头
-        raspberry_camara.openCamera()
+        # raspberry_camara.openCamera()
+        self.timer_camera = QTimer()  # 初始化定时器
+        self.cap = cv2.VideoCapture()  # 初始化摄像头
+        self.CAM_NUM = 0
+        self.timer_camera.timeout.connect(self.show_camera)
 
         self.listenEvent()
 
         self.enter_start()
 
+        self.resize(1056, 690)
+
+
+    def show_camera(self):
+        flag, self.image = self.cap.read()
+        show = cv2.resize(self.image, (480, 320))
+        show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
+        showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
+
+        self.exercise_widget.ui.video.setPixmap(QPixmap.fromImage(showImage))
+
+
     def enter_start(self):
         print("进入开始界面")
+        if self.stack.currentIndex() == 2:
+            self.timer_camera.stop()
+            self.cap.release()
         self.index = 1
         self.stack.setCurrentIndex(0)
         self.start_widget.ui.button_exercise.setStyleSheet(self.FOCUS_BUTTON)
@@ -97,6 +118,15 @@ class MainWidget(QWidget):
         print("进入锻炼界面")
         self.exercise_widget.ui.movementName.setText(item.text())
         self.stack.setCurrentIndex(2)
+
+        flag = self.cap.open(self.CAM_NUM)
+        if flag == False:
+            msg = QMessageBox.Warning(self, u'Warning', u'请检测相机与电脑是否连接正确',
+                                      buttons=QMessageBox.Ok,
+                                      defaultButton=QMessageBox.Ok)
+        else:
+            self.timer_camera.start(30)
+
         # TODO 在锻炼界面需要与服务器交互
 
     # 使用该方法设置锻炼界面中的一些数值和提示信息
@@ -155,7 +185,7 @@ class MainWidget(QWidget):
             if curIndex == 0 and self.index == 1:
                 self.enter_select()
             elif curIndex == 1:
-                self.enter_exercise(self.select_widget.ui.listWidget.item(self.index))
+                self.enter_exercise(self.select_widget.ui.listWidget.item(self.index - 1))
         elif msg == "up":
             self.up()
         elif msg == "down":
@@ -172,13 +202,6 @@ class MainWidget(QWidget):
                 l = msg.split(' ')
                 for i in range(4):
                     self.updateDataOnExercise(i=i+1, text=l[i])
-
-'''
-ANGLE = 1
-MUSCLE_STRENGTH = 2
-PHYSIOLOGICAL_FUNCTION = 3
-NUMBER = 4
-'''
 
 '''
     def listenEvent(self):

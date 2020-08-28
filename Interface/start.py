@@ -13,12 +13,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(532, 626)
+        Form.resize(1056, 690)
         Form.setAutoFillBackground(False)
         Form.setStyleSheet("font: \"宋体\";\n"
 "color: white")
         self.frame = QtWidgets.QFrame(Form)
-        self.frame.setGeometry(QtCore.QRect(130, 60, 261, 461))
+        self.frame.setGeometry(QtCore.QRect(380, 90, 261, 461))
         self.frame.setStyleSheet("background-color:rgba(186, 186, 186, 100)")
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
